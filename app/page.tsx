@@ -56,11 +56,14 @@ const playerMachine = createMachine(
             target: 'not_approved',
             actions: ['onFailure', 'onOperation'],
           },
-          reject: {
-            target: 'close_review',
-            actions: ['onReject', 'onOperation'],
-          },
+          reject: [
+            {
+              target: 'close_review',
+              actions: ['onReject', 'onOperation'],
+            },
+          ],
           allow: {
+            // target: 'ready.hist',
             target: 'ready',
             actions: ['onSuccesses', 'onOperation'],
           },
@@ -75,6 +78,12 @@ const playerMachine = createMachine(
           update: {
             target: 'awaiting_review',
             actions: ['onUpdate', 'onOperation'],
+          },
+        },
+        always: {
+          target: 'close_review',
+          cond: (context, event, meta) => {
+            return context.failures > 5;
           },
         },
       },
@@ -95,7 +104,7 @@ const playerMachine = createMachine(
         type: 'final',
       },
       ready: {
-        type: 'parallel',
+        // type: 'parallel',
         initial: 'ready',
         states: {
           ready: {
@@ -131,6 +140,9 @@ const playerMachine = createMachine(
               },
             },
           },
+          // hist: {
+          //   type: 'history',
+          // },
           // whitelist: {},
           // blacklist: {},
           // close_comment: {},
